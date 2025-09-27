@@ -7,24 +7,14 @@ services:
       - "2665:2665"
     environment:
       # Database
-      - DATABASE_URL=mongodb://mongodb:27017/bookarr
+      - DATABASE_URL=mongodb://mongodb:27017/bookarr?replicaSet=rs0&authSource=admin
       
       # NextAuth (NEXTAUTH_SECRET will be auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
       
       # API Keys are configured in the app settings, not as environment variables
       
-      # Optional: Download Clients
-      - SABNZBD_URL=http://sabnzbd:8080
-      - SABNZBD_API_KEY=
-      - NZBGET_URL=http://nzbget:6789
-      - NZBGET_USERNAME=nzbget
-      - NZBGET_PASSWORD=
-      
-      # Optional: NZB Indexers
-      - NZBGEEK_API_KEY=
-      - NZBHYDRA_URL=http://nzbhydra:5076
-      - NZBHYDRA_API_KEY=
+      # Download clients and indexers are configured in the app settings
       
       # File Management
       - BOOKS_LIBRARY_PATH=/app/data/books
@@ -32,7 +22,6 @@ services:
       - TEMP_PATH=/tmp/bookarr
       
       # Application Settings
-      - APP_NAME=Bookarr
       - DEFAULT_LANGUAGE=en
       - DEFAULT_TIMEZONE=UTC
       
@@ -61,6 +50,7 @@ services:
     volumes:
       - mongodb_data:/data/db
     restart: unless-stopped
+    command: mongod --replSet rs0 --bind_ip_all
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s

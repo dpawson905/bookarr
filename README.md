@@ -134,17 +134,7 @@ services:
       
       # API Keys are configured in the app settings, not as environment variables
       
-      # Optional: Download Clients
-      - SABNZBD_URL=http://sabnzbd:8080
-      - SABNZBD_API_KEY=
-      - NZBGET_URL=http://nzbget:6789
-      - NZBGET_USERNAME=nzbget
-      - NZBGET_PASSWORD=
-      
-      # Optional: NZB Indexers
-      - NZBGEEK_API_KEY=
-      - NZBHYDRA_URL=http://nzbhydra:5076
-      - NZBHYDRA_API_KEY=
+      # Download clients and indexers are configured in the app settings
       
       # File Management
       - BOOKS_LIBRARY_PATH=/app/data/books
@@ -152,7 +142,6 @@ services:
       - TEMP_PATH=/tmp/bookarr
       
       # Application Settings
-      - APP_NAME=Bookarr
       - DEFAULT_LANGUAGE=en
       - DEFAULT_TIMEZONE=UTC
       
@@ -247,7 +236,7 @@ Regardless of deployment method, the first time you access Bookarr:
 ### Required (Production)
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/bookarr` |
+| `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/bookarr?replicaSet=rs0&authSource=admin` |
 | `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
 | `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random) |
 
@@ -255,14 +244,8 @@ Regardless of deployment method, the first time you access Bookarr:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | **API Keys** | Google Books, Open Library | **Configured in app settings** |
-| `SABNZBD_URL` | SABnzbd URL | `http://localhost:8080` |
-| `SABNZBD_API_KEY` | SABnzbd API key | Empty |
-| `NZBGET_URL` | NZBGet URL | `http://localhost:6789` |
-| `NZBGET_USERNAME` | NZBGet username | `nzbget` |
-| `NZBGET_PASSWORD` | NZBGet password | Empty |
-| `NZBGEEK_API_KEY` | NZBGeek API key | Empty |
-| `NZBHYDRA_URL` | NZBHydra URL | `http://localhost:5076` |
-| `NZBHYDRA_API_KEY` | NZBHydra API key | Empty |
+| **Download Clients** | SABnzbd, NZBGet | **Configured in app settings** |
+| **NZB Indexers** | NZBGeek, NZBHydra | **Configured in app settings** |
 
 ## 🏗️ Architecture
 

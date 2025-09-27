@@ -9,7 +9,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // Database
-  databaseUrl: process.env.DATABASE_URL || 'mongodb://localhost:27017/bookarr',
+  databaseUrl: process.env.DATABASE_URL || 'mongodb://localhost:27017/bookarr?replicaSet=rs0&authSource=admin',
   
   // NextAuth Configuration
   nextAuth: {
@@ -17,35 +17,7 @@ export const config = {
     secret: process.env.NEXTAUTH_SECRET || 'bookarr-default-secret-change-in-production',
   },
   
-  // API Keys (optional - can be configured in app settings)
-  apis: {
-    googleBooks: process.env.GOOGLE_BOOKS_API_KEY || '',
-    openLibrary: process.env.OPEN_LIBRARY_API_KEY || '',
-  },
-  
-  // Download Clients (optional)
-  downloadClients: {
-    sabnzbd: {
-      url: process.env.SABNZBD_URL || 'http://localhost:8080',
-      apiKey: process.env.SABNZBD_API_KEY || '',
-    },
-    nzbget: {
-      url: process.env.NZBGET_URL || 'http://localhost:6789',
-      username: process.env.NZBGET_USERNAME || 'nzbget',
-      password: process.env.NZBGET_PASSWORD || '',
-    },
-  },
-  
-  // NZB Indexers (optional)
-  indexers: {
-    nzbgeek: {
-      apiKey: process.env.NZBGEEK_API_KEY || '',
-    },
-    nzbhydra: {
-      url: process.env.NZBHYDRA_URL || 'http://localhost:5076',
-      apiKey: process.env.NZBHYDRA_API_KEY || '',
-    },
-  },
+  // API Keys, Download Clients, and Indexers are configured in app settings
   
   // File Management
   paths: {
@@ -56,7 +28,6 @@ export const config = {
   
   // Application Settings
   app: {
-    name: process.env.APP_NAME || 'Bookarr',
     version: process.env.APP_VERSION || '1.0.0',
     defaultLanguage: process.env.DEFAULT_LANGUAGE || 'en',
     defaultTimezone: process.env.DEFAULT_TIMEZONE || 'UTC',
@@ -104,9 +75,6 @@ export const {
   nodeEnv,
   databaseUrl,
   nextAuth,
-  apis,
-  downloadClients,
-  indexers,
   paths,
   app,
   security,
