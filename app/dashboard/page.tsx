@@ -51,7 +51,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome back! Here's what's happening with your library.
+            Welcome back! Here&apos;s what&apos;s happening with your library.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">

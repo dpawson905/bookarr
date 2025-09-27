@@ -108,36 +108,41 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     
-    // Validate the settings data
-    const validatedSettings = settingsSchema.parse(body)
-
-    // Upsert settings (create or update)
-    const settings = await prisma.settings.upsert({
+    // Update user preferences
+    const preferences = await prisma.userPreferences.upsert({
       where: { userId: session.user.id },
-      update: { 
-        settings: validatedSettings,
-        updatedAt: new Date()
+      update: {
+        language: body.general?.language || 'en',
+        timezone: body.general?.timezone || 'UTC',
+        defaultFormat: body.library?.preferredFormats?.[0] || 'epub',
+        autoDownload: body.library?.autoOrganize || false,
+        emailNotifications: body.notifications?.emailNotifications || false,
+        downloadComplete: body.notifications?.downloadComplete || true,
+        newBookAvailable: body.notifications?.newBookAvailable || false,
+        googleBooksApiKey: body.apiKeys?.googleBooksApiKey || '',
+        openLibraryApiKey: body.apiKeys?.openLibraryApiKey || '',
       },
       create: {
         userId: session.user.id,
-        settings: validatedSettings
+        language: body.general?.language || 'en',
+        timezone: body.general?.timezone || 'UTC',
+        defaultFormat: body.library?.preferredFormats?.[0] || 'epub',
+        autoDownload: body.library?.autoOrganize || false,
+        emailNotifications: body.notifications?.emailNotifications || false,
+        downloadComplete: body.notifications?.downloadComplete || true,
+        newBookAvailable: body.notifications?.newBookAvailable || false,
+        googleBooksApiKey: body.apiKeys?.googleBooksApiKey || '',
+        openLibraryApiKey: body.apiKeys?.openLibraryApiKey || '',
       }
     })
 
     return NextResponse.json({ 
       message: 'Settings updated successfully',
-      settings: settings.settings as Settings
+      preferences
     })
   } catch (error) {
     console.error('Error updating settings:', error)
     
-    if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json(
-        { error: 'Invalid settings data', details: error.message },
-        { status: 400 }
-      )
-    }
-
     return NextResponse.json(
       { error: 'Failed to update settings' },
       { status: 500 }

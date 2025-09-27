@@ -5,8 +5,8 @@ const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    // Check database connection
-    await prisma.$queryRaw`SELECT 1`
+    // Check database connection with a simple query
+    await prisma.user.count()
     
     return NextResponse.json({
       status: 'healthy',

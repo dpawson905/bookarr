@@ -92,7 +92,7 @@ export default function SetupPage() {
             Welcome to Bookarr
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Let's set up your admin account to get started
+            Let&apos;s set up your admin account to get started
           </p>
         </div>
 

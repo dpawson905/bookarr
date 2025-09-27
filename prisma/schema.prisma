@@ -6,12 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid())
   username  String   @unique
   email     String?  @unique
   name      String?
@@ -27,13 +27,11 @@ model User {
   books       Book[]
   downloads   Download[]
   importLists ImportList[]
-
-  @@map("users")
 }
 
 model UserPreferences {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String @unique @db.ObjectId
+  id     String @id @default(cuid())
+  userId String @unique
 
   // UI preferences
   theme        String @default("system") // light, dark, system
@@ -46,7 +44,7 @@ model UserPreferences {
   
   // Library preferences
   autoDownload    Boolean @default(false)
-  qualityProfile  String? @db.ObjectId
+  qualityProfile  String?
   defaultCategory String  @default("books")
   
   // API Keys
@@ -59,12 +57,10 @@ model UserPreferences {
   newBookAvailable   Boolean @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_preferences")
 }
 
 model Author {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   name        String
   sortName    String? // For sorting (e.g., "Tolkien, J.R.R.")
   biography   String?
@@ -84,12 +80,10 @@ model Author {
   // Relations
   books  BookAuthor[]
   series Series[]
-
-  @@map("authors")
 }
 
 model Series {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   name        String
   description String?
   imageUrl    String?
@@ -97,15 +91,13 @@ model Series {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  authorId String @db.ObjectId
+  authorId String
   author   Author @relation(fields: [authorId], references: [id])
   books    Book[]
-
-  @@map("series")
 }
 
 model Book {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   title       String
   subtitle    String?
   description String?
@@ -136,26 +128,27 @@ model Book {
   googleBooksId String?
   openLibraryId String?
   goodreadsId   String?
+  
+  // Cover image
+  imageUrl      String?
 
   // Relations
-  userId     String @db.ObjectId
+  userId     String
   user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   authors    BookAuthor[]
-  seriesId   String? @db.ObjectId
+  seriesId   String?
   series     Series? @relation(fields: [seriesId], references: [id])
   seriesOrder Int? // Order within series
   
   downloads  Download[]
   categories BookCategory[]
-
-  @@map("books")
 }
 
 model BookAuthor {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  bookId   String @db.ObjectId
-  authorId String @db.ObjectId
+  id       String @id @default(cuid())
+  bookId   String
+  authorId String
   role     String @default("author") // author, editor, translator, etc.
   order    Int    @default(0) // Order of authors
 
@@ -163,24 +156,22 @@ model BookAuthor {
   author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@unique([bookId, authorId])
-  @@map("book_authors")
 }
 
 model BookCategory {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  bookId   String @db.ObjectId
+  id       String @id @default(cuid())
+  bookId   String
   category String
 
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([bookId, category])
-  @@map("book_categories")
 }
 
 model Download {
-  id          String         @id @default(auto()) @map("_id") @db.ObjectId
-  bookId      String         @db.ObjectId
-  userId      String         @db.ObjectId
+  id          String         @id @default(cuid())
+  bookId      String
+  userId      String
   status      DownloadStatus @default(PENDING)
   progress    Float          @default(0) // 0-100
   error       String?
@@ -208,12 +199,10 @@ model Download {
 
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("downloads")
 }
 
 model DownloadClient {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   name        String
   type        String   // sabnzbd, nzbget
   host        String
@@ -231,12 +220,10 @@ model DownloadClient {
   maxConnections Int   @default(4)
   maxSpeed    String? // e.g., "10M" for 10 MB/s
   paused      Boolean  @default(false)
-
-  @@map("download_clients")
 }
 
 model Indexer {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   name        String
   type        String   // nzbgeek, nzbhydra, newznab, custom
   url         String
@@ -257,20 +244,18 @@ model Indexer {
   tvSearchEnabled Boolean @default(false)
   movieSearchEnabled Boolean @default(false)
   bookSearchEnabled Boolean @default(true)
-
-  @@map("indexers")
 }
 
 model QualityProfile {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   name        String
   description String?
   isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Format preferences
-  preferredFormats String[] @default(["epub", "pdf"]) // Ordered by preference
+  // Format preferences (comma-separated string for SQLite)
+  preferredFormats String @default("epub,pdf") // Ordered by preference
   minFileSize      Int? // Minimum file size in MB
   maxFileSize      Int? // Maximum file size in MB
   
@@ -278,28 +263,23 @@ model QualityProfile {
   minQuality String @default("medium") // low, medium, high
   maxQuality String @default("high")
   
-  // Release group preferences
-  preferredGroups String[] @default([])
-  rejectedGroups  String[] @default([])
-
-  @@map("quality_profiles")
+  // Release group preferences (comma-separated strings for SQLite)
+  preferredGroups String @default("")
+  rejectedGroups  String @default("")
 }
 
 model Config {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid())
   key       String   @unique
   value     String
   type      String   @default("string") // string, number, boolean, json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@map("config")
 }
 
-
 model ImportList {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
+  id          String   @id @default(cuid())
+  userId      String
   name        String
   type        String   // goodreads, wishlist, csv, manual
   source      String? // URL or file path
@@ -314,8 +294,6 @@ model ImportList {
   maxBooks    Int? // Maximum books to import
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("import_lists")
 }
 
 enum BookStatus {

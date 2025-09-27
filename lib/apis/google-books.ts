@@ -22,7 +22,7 @@ class GoogleBooksAPI {
     return !!this.apiKey && this.apiKey.trim() !== ''
   }
 
-  private async makeRequest<T>(endpoint: string, params: Record<string, any> = {}, referer?: string): Promise<T> {
+  private async makeRequest<T>(endpoint: string, params: Record<string, string | number> = {}, referer?: string): Promise<T> {
     if (!this.isConfigured()) {
       throw new Error('Google Books API key is not configured. Please set it in Settings > API Keys.')
     }
@@ -62,7 +62,7 @@ class GoogleBooksAPI {
       filter
     } = options
 
-    const params: Record<string, any> = {
+    const params: Record<string, string | number> = {
       q: query,
       maxResults,
       startIndex,

@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     // Build where clause
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     
     if (filters.query) {
       where.OR = [
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    let orderBy: any = {}
+    let orderBy: Record<string, unknown> = {}
     switch (sortBy) {
       case 'title':
         orderBy = { title: sortOrder }

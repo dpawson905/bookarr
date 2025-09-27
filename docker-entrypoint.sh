@@ -9,7 +9,7 @@ fi
 
 # Generate other secrets if not provided
 if [ -z "$DATABASE_URL" ]; then
-    export DATABASE_URL="mongodb://mongodb:27017/bookarr?replicaSet=rs0&authSource=admin"
+    export DATABASE_URL="file:/app/data/bookarr.db"
     echo "🗄️  Using default DATABASE_URL: $DATABASE_URL"
 fi
 

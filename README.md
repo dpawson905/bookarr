@@ -28,12 +28,25 @@ Open [http://localhost:2665](http://localhost:2665)
 4. Create stack using `portainer-stack.yml`
 5. Deploy and access at [http://localhost:2665](http://localhost:2665)
 
+### Integration with Existing Setups
+Bookarr is designed to integrate seamlessly with your existing download clients and indexers:
+
+- **SABnzbd**: Configure in Settings > Download Clients
+- **NZBGet**: Configure in Settings > Download Clients  
+- **NZBGeek, NZBHydra2, etc.**: Configure in Settings > Indexers
+- **Existing Libraries**: Import via Settings > Import
+- **SQLite Database**: No separate database server needed - just like Radarr/Sonarr!
+
+No need to change your current setup - just add Bookarr alongside it!
+
 ## ✨ Features
 
+- **Standalone App**: Integrates with existing setups, doesn't replace them
+- **SQLite Database**: No separate database server needed - just like Radarr/Sonarr!
 - **First-Run Setup**: Automatic admin account creation
 - **Username Authentication**: Simple, secure login
 - **API Key Management**: Configure Google Books, Open Library APIs
-- **Download Integration**: SABnzbd, NZBGet support
+- **Download Integration**: Works with existing SABnzbd, NZBGet installations
 - **Library Management**: Organize books, authors, series
 - **Docker Ready**: Complete containerization support
 - **Portainer Compatible**: GUI-based deployment
@@ -42,12 +55,14 @@ Open [http://localhost:2665](http://localhost:2665)
 
 ## 📋 Prerequisites
 
-- Node.js 18+ (for local development)
+### Required
 - Docker & Docker Compose (for containerized deployment)
+
+### Optional (for full functionality)
+- SABnzbd or NZBGet (for downloads)
+- NZB indexers (NZBGeek, NZBHydra2, etc.)
 - Portainer (for GUI-based deployment)
-- MongoDB (local, cloud, or containerized)
-- Optional: SABnzbd or NZBGet for downloads
-- Optional: NZB indexers (NZBGeek, NZBHydra2, etc.)
+- Node.js 18+ (for local development)
 
 ## 🛠️ Deployment Methods
 
@@ -126,8 +141,8 @@ services:
     ports:
       - "2665:2665"
     environment:
-      # Database
-      - DATABASE_URL=mongodb://mongodb:27017/bookarr
+      # Database (SQLite - no separate database needed!)
+      - DATABASE_URL=file:/app/data/bookarr.db
       
       # User/Group IDs (LinuxServer.io standard)
       - PUID=1000
@@ -166,27 +181,9 @@ services:
       retries: 3
       start_period: 40s
 
-  mongodb:
-    image: mongo:7
-    container_name: bookarr-mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_DATABASE=bookarr
-    volumes:
-      - mongodb_data:/data/db
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
 volumes:
   bookarr_data:
   bookarr_temp:
-  mongodb_data:
 ```
 
 #### Step 3: Build the Image
@@ -241,7 +238,7 @@ Regardless of deployment method, the first time you access Bookarr:
 ### Required (Production)
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/bookarr?replicaSet=rs0&authSource=admin` |
+| `DATABASE_URL` | SQLite database file path | `file:./data/bookarr.db` |
 | `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
 | `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random) |
 

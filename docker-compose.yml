@@ -12,8 +12,8 @@ services:
       - PGID=1000
       - TZ=UTC
       
-      # Database
-      - DATABASE_URL=mongodb://mongodb:27017/bookarr?replicaSet=rs0&authSource=admin
+      # Database (SQLite - no separate database needed!)
+      - DATABASE_URL=file:/app/data/bookarr.db
       
       # NextAuth (NEXTAUTH_SECRET will be auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
@@ -37,8 +37,6 @@ services:
     volumes:
       - bookarr_data:/app/data
       - bookarr_temp:/tmp/bookarr
-    depends_on:
-      - mongodb
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:2665/api/health"]
@@ -47,61 +45,6 @@ services:
       retries: 3
       start_period: 40s
 
-  mongodb:
-    image: mongo:7
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_DATABASE=bookarr
-    volumes:
-      - mongodb_data:/data/db
-    restart: unless-stopped
-    command: mongod --replSet rs0 --bind_ip_all
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Optional: SABnzbd for downloads
-  sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:latest
-    container_name: sabnzbd
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=UTC
-    volumes:
-      - sabnzbd_config:/config
-      - bookarr_downloads:/downloads
-    ports:
-      - "8080:8080"
-    restart: unless-stopped
-    profiles:
-      - downloads
-
-  # Optional: NZBGet for downloads
-  nzbget:
-    image: lscr.io/linuxserver/nzbget:latest
-    container_name: nzbget
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=UTC
-    volumes:
-      - nzbget_config:/config
-      - bookarr_downloads:/downloads
-    ports:
-      - "6789:6789"
-    restart: unless-stopped
-    profiles:
-      - downloads
-
 volumes:
   bookarr_data:
   bookarr_temp:
-  mongodb_data:
-  sabnzbd_config:
-  nzbget_config:
-  bookarr_downloads:

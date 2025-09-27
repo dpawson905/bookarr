@@ -59,7 +59,11 @@ export default function BooksPage() {
         fileSize: 1024000,
         format: 'EPUB',
         quality: 'high',
+        asin: 'B000FC0U8A',
         googleBooksId: 'foundation123',
+        openLibraryId: 'OL123456B',
+        goodreadsId: '12345',
+        imageUrl: 'https://covers.openlibrary.org/b/isbn/0553293354-M.jpg',
         authors: [
           {
             id: '1',
@@ -125,7 +129,11 @@ export default function BooksPage() {
         fileSize: 2048000,
         format: 'EPUB',
         quality: 'high',
+        asin: 'B000FC0U8B',
         googleBooksId: 'dune123',
+        openLibraryId: 'OL234567B',
+        goodreadsId: '23456',
+        imageUrl: 'https://covers.openlibrary.org/b/isbn/0441013597-M.jpg',
         authors: [
           {
             id: '2',

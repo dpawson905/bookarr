@@ -9,7 +9,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   
   // Database
-  databaseUrl: process.env.DATABASE_URL || 'mongodb://localhost:27017/bookarr?replicaSet=rs0&authSource=admin',
+  databaseUrl: process.env.DATABASE_URL || 'file:./data/bookarr.db',
   
   // NextAuth Configuration
   nextAuth: {
