@@ -16,6 +16,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Allow access to setup and auth pages without authentication checks
+  if (pathname === '/' || pathname === '/setup' || pathname === '/auth/signin') {
+    return NextResponse.next()
+  }
+
   // Check authentication for protected routes
   const token = await getToken({ 
     req: request, 

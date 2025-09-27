@@ -2,8 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import fs from 'fs'
+import path from 'path'
 
 const prisma = new PrismaClient()
+
+// Initialize database if it doesn't exist
+async function ensureDatabaseExists() {
+  try {
+    const dataDir = path.join(process.cwd(), 'data')
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true })
+    }
+    
+    // Try to connect to the database
+    await prisma.$connect()
+    return true
+  } catch (error) {
+    console.error('Database connection failed:', error)
+    return false
+  }
+}
 
 const setupSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -97,6 +116,16 @@ export async function POST(request: NextRequest) {
 // GET /api/setup - Check if setup is needed
 export async function GET() {
   try {
+    // Ensure database exists first
+    const dbExists = await ensureDatabaseExists()
+    if (!dbExists) {
+      return NextResponse.json({ 
+        setupRequired: true,
+        userCount: 0,
+        error: 'Database not available'
+      })
+    }
+
     const userCount = await prisma.user.count()
     
     return NextResponse.json({ 
@@ -106,7 +135,11 @@ export async function GET() {
   } catch (error) {
     console.error('Setup check error:', error)
     return NextResponse.json(
-      { error: 'Failed to check setup status' },
+      { 
+        setupRequired: true,
+        userCount: 0,
+        error: 'Failed to check setup status'
+      },
       { status: 500 }
     )
   } finally {

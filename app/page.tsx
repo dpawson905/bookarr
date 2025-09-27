@@ -11,6 +11,11 @@ export default function HomePage() {
     const checkSetupStatus = async () => {
       try {
         const response = await fetch('/api/setup')
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        
         const data = await response.json()
         
         if (data.setupRequired) {
@@ -20,7 +25,7 @@ export default function HomePage() {
         }
       } catch (error) {
         console.error('Error checking setup status:', error)
-        // If there's any error, assume setup is required
+        // If there's any error (including database connection), assume setup is required
         router.push('/setup')
       }
     }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { FileInput } from '@/components/ui/file-input'
 import ApiKeysSettings from '@/components/settings/ApiKeysSettings'
 import { 
   Settings, 
@@ -19,6 +20,8 @@ import {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general')
+  const [libraryPath, setLibraryPath] = useState('')
+  const [downloadPath, setDownloadPath] = useState('')
 
   const tabs = [
     { id: 'general', label: 'General', icon: Settings },
@@ -182,18 +185,24 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="library-path">Library Path</Label>
-                    <div className="flex gap-2">
-                      <Input id="library-path" placeholder="/path/to/books" />
-                      <Button variant="outline">Browse</Button>
-                    </div>
+                    <FileInput
+                      id="library-path"
+                      placeholder="/path/to/books"
+                      value={libraryPath}
+                      onChange={(e) => setLibraryPath(e.target.value)}
+                      onPathSelect={setLibraryPath}
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="download-path">Download Path</Label>
-                    <div className="flex gap-2">
-                      <Input id="download-path" placeholder="/path/to/downloads" />
-                      <Button variant="outline">Browse</Button>
-                    </div>
+                    <FileInput
+                      id="download-path"
+                      placeholder="/path/to/downloads"
+                      value={downloadPath}
+                      onChange={(e) => setDownloadPath(e.target.value)}
+                      onPathSelect={setDownloadPath}
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -218,6 +227,10 @@ export default function SettingsPage() {
                   <div className="flex items-center space-x-2">
                     <Switch id="duplicate-detection" />
                     <Label htmlFor="duplicate-detection">Enable duplicate detection</Label>
+                  </div>
+
+                  <div className="pt-4">
+                    <Button>Save Library Settings</Button>
                   </div>
                 </CardContent>
               </Card>

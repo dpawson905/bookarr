@@ -3,6 +3,14 @@ import { Book, Author, Series, Download, User, BookStatus, DownloadStatus } from
 // Re-export Prisma types
 export type { Book, Author, Series, Download, User, BookStatus, DownloadStatus }
 
+// Extended HTML input attributes for file inputs
+declare module 'react' {
+  interface InputHTMLAttributes<T> {
+    webkitdirectory?: string
+    directory?: string
+  }
+}
+
 // Extended types with relations
 export interface BookWithDetails extends Book {
   authors: (BookAuthor & { author: Author })[]

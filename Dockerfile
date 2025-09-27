@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --include=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -21,6 +21,9 @@ RUN mkdir -p data
 
 # Generate Prisma client
 RUN npx prisma generate
+
+# Initialize database during build
+RUN npx prisma db push
 
 # Build the application
 RUN npm run build
@@ -37,7 +40,7 @@ RUN apk add --no-cache openssl
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN adduser --system --uid 1001 --ingroup nodejs nextjs
 
 # Copy built application
 COPY --from=builder /app/public ./public
@@ -45,14 +48,17 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# Copy initialized database
+COPY --from=builder /app/prisma/data/bookarr.db ./prisma/data/bookarr.db
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Create data directories
-RUN mkdir -p /app/data/books /app/data/downloads /tmp/bookarr
-RUN chown -R nextjs:nodejs /app/data /tmp/bookarr
+RUN mkdir -p /app/data/books /app/data/downloads /app/prisma/data /tmp/bookarr
+RUN chown -R nextjs:nodejs /app/data /app/prisma /tmp/bookarr
+RUN chmod -R 755 /app/data /app/prisma
 
 USER nextjs
 

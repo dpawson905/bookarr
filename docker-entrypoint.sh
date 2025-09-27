@@ -23,6 +23,9 @@ fi
 # Database path is hardcoded in schema - no configuration needed
 echo "🗄️  Database: SQLite at /app/data/bookarr.db (hardcoded)"
 
+# Database will be initialized by the application on first run
+echo "📊 Database will be initialized by the application on first run"
+
 if [ -z "$NEXTAUTH_URL" ]; then
     export NEXTAUTH_URL="http://localhost:2665"
     echo "🌐 Using default NEXTAUTH_URL: $NEXTAUTH_URL"
