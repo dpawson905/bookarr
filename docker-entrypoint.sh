@@ -20,6 +20,7 @@ fi
 
 echo "🚀 Starting Bookarr..."
 echo "📚 Access the application at: $NEXTAUTH_URL"
+echo "⚙️  Configure API keys in Settings > API Keys after first login"
 
 # Execute the main command
 exec "$@"

@@ -12,9 +12,7 @@ services:
       # NextAuth (NEXTAUTH_SECRET will be auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
       
-      # Optional: API Keys (can also be set in app settings)
-      - GOOGLE_BOOKS_API_KEY=
-      - OPEN_LIBRARY_API_KEY=
+      # API Keys are configured in the app settings, not as environment variables
       
       # Optional: Download Clients
       - SABNZBD_URL=http://sabnzbd:8080

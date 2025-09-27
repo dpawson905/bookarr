@@ -132,9 +132,7 @@ services:
       # NextAuth (NEXTAUTH_SECRET auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
       
-      # Optional: API Keys (can also be set in app settings)
-      - GOOGLE_BOOKS_API_KEY=
-      - OPEN_LIBRARY_API_KEY=
+      # API Keys are configured in the app settings, not as environment variables
       
       # Optional: Download Clients
       - SABNZBD_URL=http://sabnzbd:8080
@@ -256,8 +254,7 @@ Regardless of deployment method, the first time you access Bookarr:
 ### Optional (Can be set in app settings)
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GOOGLE_BOOKS_API_KEY` | Google Books API key | Empty |
-| `OPEN_LIBRARY_API_KEY` | Open Library API key | Empty |
+| **API Keys** | Google Books, Open Library | **Configured in app settings** |
 | `SABNZBD_URL` | SABnzbd URL | `http://localhost:8080` |
 | `SABNZBD_API_KEY` | SABnzbd API key | Empty |
 | `NZBGET_URL` | NZBGet URL | `http://localhost:6789` |
