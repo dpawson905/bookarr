@@ -102,6 +102,25 @@ Available tags on Docker Hub (`dpawson905/bookarr`):
 docker pull dpawson905/bookarr:latest
 ```
 
+## 🤖 Automated Builds
+
+This repository includes GitHub Actions for automated Docker Hub publishing:
+
+- **Automatic builds** on push to `main` and `develop` branches
+- **Version tags** when you create Git tags (e.g., `v1.0.0`)
+- **Multi-architecture** support (AMD64 and ARM64)
+
+### Setting Up Automated Builds
+
+1. **Fork this repository** to your GitHub account
+2. **Create Docker Hub repository** named `bookarr` under your account
+3. **Add GitHub Secrets**:
+   - `DOCKER_USERNAME`: Your Docker Hub username
+   - `DOCKER_PASSWORD`: Your Docker Hub access token
+4. **Push to main branch** to trigger the first build
+
+📖 **Detailed setup instructions**: See [.github/DOCKER_HUB_SETUP.md](.github/DOCKER_HUB_SETUP.md)
+
 ## 📋 Prerequisites
 
 ### Required
