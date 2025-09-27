@@ -22,10 +22,11 @@ docker-compose up -d
 Open [http://localhost:2665](http://localhost:2665)
 
 ### Portainer (GUI)
-1. Run `./scripts/prepare-portainer.sh`
-2. Import `dist/bookarr.tar.gz` in Portainer
-3. Create stack using `dist/portainer-stack.yml`
-4. Deploy and access at [http://localhost:2665](http://localhost:2665)
+1. Build the image: `docker build -t bookarr:latest .`
+2. Save the image: `docker save bookarr:latest | gzip > bookarr.tar.gz`
+3. Import `bookarr.tar.gz` in Portainer
+4. Create stack using `portainer-stack.yml`
+5. Deploy and access at [http://localhost:2665](http://localhost:2665)
 
 ## ✨ Features
 
@@ -128,9 +129,8 @@ services:
       # Database
       - DATABASE_URL=mongodb://mongodb:27017/bookarr
       
-      # NextAuth (IMPORTANT: Change these for production)
+      # NextAuth (NEXTAUTH_SECRET auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
-      - NEXTAUTH_SECRET=your-secret-key-change-in-production
       
       # Optional: API Keys (can also be set in app settings)
       - GOOGLE_BOOKS_API_KEY=
@@ -251,7 +251,7 @@ Regardless of deployment method, the first time you access Bookarr:
 |----------|-------------|---------|
 | `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/bookarr` |
 | `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
-| `NEXTAUTH_SECRET` | NextAuth secret key | `bookarr-default-secret-change-in-production` |
+| `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random) |
 
 ### Optional (Can be set in app settings)
 | Variable | Description | Default |

@@ -9,9 +9,8 @@ services:
       # Database
       - DATABASE_URL=mongodb://mongodb:27017/bookarr
       
-      # NextAuth
+      # NextAuth (NEXTAUTH_SECRET will be auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
-      - NEXTAUTH_SECRET=your-secret-key-change-in-production
       
       # Optional: API Keys (can also be set in app settings)
       - GOOGLE_BOOKS_API_KEY=
