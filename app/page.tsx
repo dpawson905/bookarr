@@ -1,8 +1,4 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { BookOpen, Download, User, Settings, ArrowRight, LogIn } from 'lucide-react'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()

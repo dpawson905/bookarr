@@ -107,7 +107,7 @@ export default function ApiKeysSettings() {
           message: result.message
         }
       }))
-    } catch (error) {
+    } catch {
       setTestResults(prev => ({
         ...prev,
         [service === 'google-books' ? 'googleBooks' : 'openLibrary']: {
@@ -137,7 +137,7 @@ export default function ApiKeysSettings() {
         throw new Error(errorData.error || 'Failed to save API keys')
       }
 
-      const result = await response.json()
+      await response.json()
       updateApiKeys({
         googleBooksApiKey: googleBooksKey,
         openLibraryApiKey: openLibraryKey

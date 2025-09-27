@@ -3,13 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
-    }
-  }
-})
+const prisma = new PrismaClient()
 
 const setupSchema = z.object({
   name: z.string().min(1, 'Name is required'),

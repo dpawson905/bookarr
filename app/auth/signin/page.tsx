@@ -48,8 +48,8 @@ export default function SignInPage() {
           router.push('/dashboard')
         }
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
+        } catch {
+          setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }

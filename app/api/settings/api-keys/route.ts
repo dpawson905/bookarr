@@ -1,28 +1,24 @@
+import { isAuthenticatedSession } from "@/types/session"
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { apiKeySettingsSchema } from '@/lib/validations/settings'
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
-    }
-  }
-})
+const prisma = new PrismaClient()
 
 // GET /api/settings/api-keys - Get API key settings
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!isAuthenticatedSession(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const preferences = await prisma.userPreferences.findUnique({
-      where: { userId: session.user.id }
+      where: { userId:
+      session.user.id }
     })
 
     const apiKeys = {
@@ -45,7 +41,7 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!isAuthenticatedSession(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -56,7 +52,8 @@ export async function PUT(request: NextRequest) {
 
     // Upsert user preferences with API keys
     const updatedPreferences = await prisma.userPreferences.upsert({
-      where: { userId: session.user.id },
+      where: { userId:
+      session.user.id },
       update: { 
         googleBooksApiKey: validatedApiKeys.googleBooksApiKey,
         openLibraryApiKey: validatedApiKeys.openLibraryApiKey,

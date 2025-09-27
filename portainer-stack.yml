@@ -12,8 +12,8 @@ services:
       - PGID=1000
       - TZ=UTC
       
-      # Database (SQLite - no separate database needed!)
-      - DATABASE_URL=file:/app/data/bookarr.db
+          # Database (SQLite - hardcoded to /app/data/bookarr.db)
+          # No DATABASE_URL needed - path is hardcoded in schema
       
       # NextAuth (NEXTAUTH_SECRET will be auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665

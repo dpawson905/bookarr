@@ -8,8 +8,9 @@ export const config = {
   port: process.env.PORT || '2665',
   nodeEnv: process.env.NODE_ENV || 'development',
   
-  // Database
-  databaseUrl: process.env.DATABASE_URL || 'file:./data/bookarr.db',
+  // Database (hardcoded to ./data/bookarr.db)
+  // No configuration needed - SQLite database is always in the same location
+  databaseUrl: 'file:./data/bookarr.db',
   
   // NextAuth Configuration
   nextAuth: {
@@ -57,9 +58,7 @@ export function validateConfig() {
       errors.push('NEXTAUTH_SECRET must be set in production')
     }
     
-    if (config.databaseUrl === 'mongodb://localhost:27017/bookarr') {
-      errors.push('DATABASE_URL must be set in production')
-    }
+    // Database URL is hardcoded, no validation needed
   }
   
   if (errors.length > 0) {

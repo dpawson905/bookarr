@@ -39,7 +39,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=UTC
-      - DATABASE_URL=file:/app/data/bookarr.db
+      # Database (SQLite - automatically created at /app/data/bookarr.db)
       - NEXTAUTH_URL=http://localhost:2665
     volumes:
       - bookarr_data:/app/data
@@ -210,7 +210,7 @@ services:
       - "2665:2665"
     environment:
       # Database (SQLite - no separate database needed!)
-      - DATABASE_URL=file:/app/data/bookarr.db
+      # Database (SQLite - automatically created at /app/data/bookarr.db)
       
       # User/Group IDs (LinuxServer.io standard)
       - PUID=1000
@@ -306,9 +306,12 @@ Regardless of deployment method, the first time you access Bookarr:
 ### Required (Production)
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DATABASE_URL` | SQLite database file path | `file:./data/bookarr.db` |
 | `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
 | `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random) |
+
+### Database
+- **SQLite database**: Automatically created at `./data/bookarr.db` (local) or `/app/data/bookarr.db` (Docker)
+- **No configuration needed**: Database path is hardcoded for simplicity
 
 ### System (LinuxServer.io Standard)
 | Variable | Description | Default |

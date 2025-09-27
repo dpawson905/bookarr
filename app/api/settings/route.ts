@@ -1,22 +1,17 @@
+import { isAuthenticatedSession } from "@/types/session"
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
-    }
-  }
-})
+const prisma = new PrismaClient()
 
 // GET /api/settings - Get user settings
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!isAuthenticatedSession(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -108,7 +103,7 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!isAuthenticatedSession(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

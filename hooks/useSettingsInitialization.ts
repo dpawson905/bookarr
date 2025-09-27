@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useSettingsStore } from '@/stores/useSettingsStore'
+import { isAuthenticatedSession } from '@/types/session'
 
 export function useSettingsInitialization() {
   const { data: session, status } = useSession()
@@ -8,7 +9,7 @@ export function useSettingsInitialization() {
 
   useEffect(() => {
     // Only load API keys if user is authenticated
-    if (status !== 'authenticated' || !session?.user?.id) {
+        if (!isAuthenticatedSession(session)) {
       return
     }
 

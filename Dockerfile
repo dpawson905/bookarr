@@ -16,6 +16,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Create data directory for Prisma
+RUN mkdir -p data
+
 # Generate Prisma client
 RUN npx prisma generate
 

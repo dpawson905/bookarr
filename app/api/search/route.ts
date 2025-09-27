@@ -1,23 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { googleBooksAPI } from '@/lib/apis/google-books'
-import { Settings } from '@/lib/validations/settings'
+import { isAuthenticatedSession } from '@/types/session'
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
-    }
-  }
-})
+const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    if (!isAuthenticatedSession(session)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

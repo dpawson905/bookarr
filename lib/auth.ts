@@ -1,18 +1,13 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 import { PrismaClient } from '@prisma/client'
 import { nextAuth } from './config'
 import bcrypt from 'bcryptjs'
+import type { JWT } from 'next-auth/jwt'
+import type { Session } from 'next-auth'
 
 // Create a new Prisma client instance for auth
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
-    }
-  }
-})
+const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -64,14 +59,15 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   callbacks: {
-    async jwt({ token, user }) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async jwt({ token, user }: { token: JWT; user: any }) {
       if (user) {
         token.id = user.id
         token.username = user.username
       }
       return token
     },
-    async session({ session, token }) {
+        async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
         session.user.id = token.id as string
         session.user.username = token.username as string

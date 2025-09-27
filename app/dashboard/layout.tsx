@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
+import { isAuthenticatedSession } from '@/types/session'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useSettingsInitialization } from '@/hooks/useSettingsInitialization'
@@ -36,7 +37,6 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
   const { data: session } = useSession()
   const userMenuRef = useRef<HTMLDivElement>(null)
   
@@ -175,7 +175,12 @@ export default function DashboardLayout({
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <User className="h-5 w-5" />
-                <span className="hidden sm:block">{session?.user?.username || 'User'}</span>
+                    <span className="hidden sm:block">
+                      {isAuthenticatedSession(session) 
+                        ? session.user.name || session.user.email || 'User'
+                        : 'User'
+                      }
+                    </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
 
@@ -184,7 +189,10 @@ export default function DashboardLayout({
                 <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50">
                   <div className="py-1">
                     <div className="px-4 py-2 text-sm text-muted-foreground border-b">
-                      {session?.user?.name || session?.user?.username}
+                          {isAuthenticatedSession(session) 
+                            ? session.user.name || session.user.email
+                            : 'User'
+                          }
                     </div>
                     <button
                       onClick={handleLogout}

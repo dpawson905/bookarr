@@ -221,7 +221,7 @@ export interface DashboardStats {
 export interface ImportSource {
   type: 'goodreads' | 'csv' | 'manual'
   name: string
-  data?: any
+  data?: unknown
   file?: File
 }
 

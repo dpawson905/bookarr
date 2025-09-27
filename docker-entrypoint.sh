@@ -7,11 +7,8 @@ if [ -z "$NEXTAUTH_SECRET" ]; then
     echo "💡 To use a custom secret, set NEXTAUTH_SECRET environment variable"
 fi
 
-# Generate other secrets if not provided
-if [ -z "$DATABASE_URL" ]; then
-    export DATABASE_URL="file:/app/data/bookarr.db"
-    echo "🗄️  Using default DATABASE_URL: $DATABASE_URL"
-fi
+# Database path is hardcoded in schema - no configuration needed
+echo "🗄️  Database: SQLite at /app/data/bookarr.db (hardcoded)"
 
 if [ -z "$NEXTAUTH_URL" ]; then
     export NEXTAUTH_URL="http://localhost:2665"
