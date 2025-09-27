@@ -1,36 +1,407 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bookarr - Ebook & Audiobook Management
 
-## Getting Started
+A modern replacement for Readarr, built with Next.js 15, featuring automated Usenet downloads and digital library management.
 
-First, run the development server:
+## 🚀 Quick Start
 
+### Local Development
 ```bash
+git clone <repository-url>
+cd bookarr
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+Open [http://localhost:2665](http://localhost:2665)
+
+### Docker Compose
+```bash
+git clone <repository-url>
+cd bookarr
+docker-compose up -d
+```
+Open [http://localhost:2665](http://localhost:2665)
+
+### Portainer (GUI)
+1. Run `./scripts/prepare-portainer.sh`
+2. Import `dist/bookarr.tar.gz` in Portainer
+3. Create stack using `dist/portainer-stack.yml`
+4. Deploy and access at [http://localhost:2665](http://localhost:2665)
+
+## ✨ Features
+
+- **First-Run Setup**: Automatic admin account creation
+- **Username Authentication**: Simple, secure login
+- **API Key Management**: Configure Google Books, Open Library APIs
+- **Download Integration**: SABnzbd, NZBGet support
+- **Library Management**: Organize books, authors, series
+- **Docker Ready**: Complete containerization support
+- **Portainer Compatible**: GUI-based deployment
+
+**Note:** Bookarr runs on port 2665 (spells "BOOK" on a keypad) to avoid conflicts with other common development ports.
+
+## 📋 Prerequisites
+
+- Node.js 18+ (for local development)
+- Docker & Docker Compose (for containerized deployment)
+- Portainer (for GUI-based deployment)
+- MongoDB (local, cloud, or containerized)
+- Optional: SABnzbd or NZBGet for downloads
+- Optional: NZB indexers (NZBGeek, NZBHydra2, etc.)
+
+## 🛠️ Deployment Methods
+
+### Method 1: Local Development
+
+1. **Clone and install:**
+   ```bash
+   git clone <repository-url>
+   cd bookarr
+   npm install
+   ```
+
+2. **Set up the database:**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the application:**
+   Navigate to `http://localhost:2665`
+
+**Note:** No .env file needed! The app uses sensible defaults and can be configured through the web interface.
+
+### Method 2: Docker Compose
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd bookarr
+   ```
+
+2. **Start the application:**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the application:**
+   Navigate to `http://localhost:2665`
+
+### Method 3: Portainer (GUI Deployment)
+
+Portainer provides a web-based GUI for managing Docker containers.
+
+#### Prerequisites
+- Portainer installed and running
+- Access to Portainer web interface
+- Docker host with internet access
+
+#### Step 1: Create a Stack
+
+1. **Login to Portainer**
+   - Open your Portainer web interface
+   - Login with your credentials
+
+2. **Create a new stack**
+   - Go to "Stacks" in the left sidebar
+   - Click "Add stack"
+   - Name it "bookarr"
+
+#### Step 2: Add Stack Configuration
+
+Copy and paste the following docker-compose configuration:
+
+```yaml
+version: '3.8'
+
+services:
+  bookarr:
+    image: bookarr:latest
+    container_name: bookarr
+    ports:
+      - "2665:2665"
+    environment:
+      # Database
+      - DATABASE_URL=mongodb://mongodb:27017/bookarr
+      
+      # NextAuth (IMPORTANT: Change these for production)
+      - NEXTAUTH_URL=http://localhost:2665
+      - NEXTAUTH_SECRET=your-secret-key-change-in-production
+      
+      # Optional: API Keys (can also be set in app settings)
+      - GOOGLE_BOOKS_API_KEY=
+      - OPEN_LIBRARY_API_KEY=
+      
+      # Optional: Download Clients
+      - SABNZBD_URL=http://sabnzbd:8080
+      - SABNZBD_API_KEY=
+      - NZBGET_URL=http://nzbget:6789
+      - NZBGET_USERNAME=nzbget
+      - NZBGET_PASSWORD=
+      
+      # Optional: NZB Indexers
+      - NZBGEEK_API_KEY=
+      - NZBHYDRA_URL=http://nzbhydra:5076
+      - NZBHYDRA_API_KEY=
+      
+      # File Management
+      - BOOKS_LIBRARY_PATH=/app/data/books
+      - DOWNLOADS_PATH=/app/data/downloads
+      - TEMP_PATH=/tmp/bookarr
+      
+      # Application Settings
+      - APP_NAME=Bookarr
+      - DEFAULT_LANGUAGE=en
+      - DEFAULT_TIMEZONE=UTC
+      
+      # Features
+      - ENABLE_API_KEYS=true
+      - ENABLE_DOWNLOADS=true
+    volumes:
+      - bookarr_data:/app/data
+      - bookarr_temp:/tmp/bookarr
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2665/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mongodb:
+    image: mongo:7
+    container_name: bookarr-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=bookarr
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  bookarr_data:
+  bookarr_temp:
+  mongodb_data:
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Step 3: Build the Image
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Since we need to build the image first, you have two options:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Option A: Build from Git Repository**
+1. **Add build configuration** to the stack:
+   ```yaml
+   bookarr:
+     build:
+       context: https://github.com/your-username/bookarr.git
+       dockerfile: Dockerfile
+     # ... rest of configuration
+   ```
 
-## Learn More
+**Option B: Pre-built Image (Recommended)**
+1. **Build the image locally first:**
+   ```bash
+   git clone <repository-url>
+   cd bookarr
+   docker build -t bookarr:latest .
+   docker save bookarr:latest | gzip > bookarr.tar.gz
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Import the image in Portainer:**
+   - Go to "Images" in Portainer
+   - Click "Import image"
+   - Upload the `bookarr.tar.gz` file
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Step 4: Deploy the Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Deploy the stack**
+   - Click "Deploy the stack"
+   - Wait for containers to start
 
-## Deploy on Vercel
+2. **Access the application**
+   - Navigate to `http://your-server:2665`
+   - Complete the first-time setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔧 First-Time Setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Regardless of deployment method, the first time you access Bookarr:
+
+1. **Visit the application** → You'll be redirected to the setup page
+2. **Create admin account** → Enter username, name, and password
+3. **Configure settings** → Set up API keys, download clients, and preferences
+4. **Start using Bookarr** → Begin managing your digital library
+
+## ⚙️ Environment Variables
+
+### Required (Production)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/bookarr` |
+| `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
+| `NEXTAUTH_SECRET` | NextAuth secret key | `bookarr-default-secret-change-in-production` |
+
+### Optional (Can be set in app settings)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GOOGLE_BOOKS_API_KEY` | Google Books API key | Empty |
+| `OPEN_LIBRARY_API_KEY` | Open Library API key | Empty |
+| `SABNZBD_URL` | SABnzbd URL | `http://localhost:8080` |
+| `SABNZBD_API_KEY` | SABnzbd API key | Empty |
+| `NZBGET_URL` | NZBGet URL | `http://localhost:6789` |
+| `NZBGET_USERNAME` | NZBGet username | `nzbget` |
+| `NZBGET_PASSWORD` | NZBGet password | Empty |
+| `NZBGEEK_API_KEY` | NZBGeek API key | Empty |
+| `NZBHYDRA_URL` | NZBHydra URL | `http://localhost:5076` |
+| `NZBHYDRA_API_KEY` | NZBHydra API key | Empty |
+
+## 🏗️ Architecture
+
+### Core Infrastructure
+- **Frontend**: Next.js 15 with App Router, TypeScript, Tailwind CSS
+- **UI**: shadcn/ui component library, Lucide React icons
+- **State**: Zustand for client state, TanStack Query for server state
+- **Backend**: Prisma ORM with MongoDB
+- **Validation**: Zod schemas, React Hook Form
+- **APIs**: Axios, Google Books API integration
+
+### Database Schema
+- **User management** with preferences and roles
+- **Book metadata** and file tracking
+- **Author and series** relationships
+- **Download queue** and history
+- **Download client** configurations
+- **NZB indexer** settings
+- **Quality profiles** and import lists
+
+### Project Structure
+```
+app/
+├── (dashboard)/          # Dashboard layout group
+│   ├── books/           # Book management
+│   ├── authors/         # Author pages
+│   ├── downloads/       # Download queue
+│   └── settings/        # Configuration
+├── api/                 # API routes
+│   ├── books/          # Book CRUD
+│   └── search/         # Search endpoints
+components/              # Reusable components
+├── ui/                 # shadcn/ui components
+lib/                    # Utilities and configs
+├── apis/               # External API clients
+├── validations/        # Zod schemas
+stores/                 # Zustand stores
+types/                  # TypeScript definitions
+```
+
+## 🔧 Configuration
+
+### Download Clients
+1. Install SABnzbd or NZBGet
+2. Configure API access in settings
+3. Set up download categories
+4. Test connection
+
+### NZB Indexers
+1. Sign up for NZBGeek or similar
+2. Get API key
+3. Configure in settings
+4. Test search functionality
+
+### File Organization
+1. Set library path in settings
+2. Configure naming schemes
+3. Enable auto-organization
+4. Set up duplicate detection
+
+## 🐳 Docker Management
+
+### Portainer Features
+- **Easy Updates**: Update the stack configuration and redeploy
+- **Logs**: View container logs directly in Portainer
+- **Monitoring**: Monitor resource usage and health
+- **Backups**: Easy volume backup and restore
+- **Scaling**: Scale services if needed
+
+### Troubleshooting in Portainer
+
+1. **Check container status**
+   - Go to "Containers" → Find "bookarr"
+   - Check if it's running
+
+2. **View logs**
+   - Click on "bookarr" container
+   - Go to "Logs" tab
+   - Look for error messages
+
+3. **Check health**
+   - Go to "Containers" → "bookarr"
+   - Check the health status
+   - Visit `http://your-server:2665/api/health`
+
+4. **Restart services**
+   - Go to "Stacks" → "bookarr"
+   - Click "Editor" → "Update the stack"
+
+## 🚨 Troubleshooting
+
+### Common Issues
+1. **Database connection**: Ensure MongoDB is running
+2. **API keys**: Check environment variables
+3. **File paths**: Verify directory permissions
+4. **Download clients**: Test API connectivity
+
+### Getting Help
+- Check the console for errors
+- Verify environment variables
+- Test API connections in settings
+- Check file permissions
+
+## 📝 Development
+
+### Key Dependencies
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **UI**: shadcn/ui, Lucide React icons
+- **State**: Zustand, TanStack Query
+- **Backend**: Prisma, MongoDB
+- **Validation**: Zod, React Hook Form
+- **APIs**: Axios, Google Books API
+
+### Available Scripts
+- `npm run dev` - Start development server on port 2665
+- `npm run build` - Build for production
+- `npm run start` - Start production server on port 2665
+- `npm run lint` - Run ESLint
+
+## 📄 License
+
+This project is for personal use. Please respect copyright laws and terms of service for all APIs and services used.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📞 Support
+
+For issues and questions:
+1. Check the console for errors
+2. Verify environment variables
+3. Test API connections in settings
+4. Check file permissions
+5. Review the troubleshooting section above

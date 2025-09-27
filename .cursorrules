@@ -1,0 +1,210 @@
+# Readarr Replacement Project - Cursor Rules
+
+You are an expert full-stack developer building a modern replacement for Readarr (ebook/audiobook management). This application will automatically search, download, and organize digital books using Usenet.
+
+## Project Overview
+- **Purpose**: Automated ebook/audiobook acquisition and library management
+- **APIs**: Google Books API (primary) with OpenLibrary API fallback
+- **Download**: Usenet via multiple downloaders (SABnzbd, NZBGet) and indexers (NZBGeek, NZBHydra2, etc.)
+- **Formats**: EPUB (primary), PDF (secondary) - optimized for Apple Books, Google Play Books, and cross-platform readers
+- **Frontend**: Next.js 15 with App Router
+- **UI**: shadcn/ui + Aceternity UI for modern, responsive design
+- **Database**: Prisma with MongoDB
+- **Authentication**: Basic auth with session management
+- **Architecture**: Full-stack TypeScript application
+
+## Core Features to Implement
+1. **Library Management**: Add books by title/author/ISBN, track reading status, author/series tracking
+2. **Search Integration**: Google Books API for metadata, cover art, descriptions
+3. **Usenet Integration**: Multiple download clients (SABnzbd, NZBGet) and indexers (NZBGeek, NZBHydra2, Newznab-compatible)
+4. **File Organization**: Automatic file naming, folder structure management, quality profiles
+5. **Configuration**: Folder paths, download client settings, indexer management, quality profiles
+6. **Monitoring**: Download progress, failed downloads, retry logic
+7. **Import**: Scan existing libraries, match books to metadata, Goodreads/wishlist integration
+8. **Authentication**: Basic login system with session management
+9. **Reading Status**: Track read/unread status, reading progress, personal ratings
+
+## Technology Stack
+
+### Frontend (Next.js 15)
+- Use App Router exclusively
+- TypeScript strict mode
+- Tailwind CSS for styling
+- shadcn/ui components as base UI library
+- Aceternity UI for advanced animations and interactions
+- React Hook Form with Zod validation
+- TanStack Query for server state management
+- **Zustand for client-side state management** (UI state, user preferences, filters)
+
+### Backend & Database  
+- Next.js API routes for backend logic
+- Prisma ORM with MongoDB
+- External API integrations (Google Books, SABnzbd)
+- File system operations for library management
+- Background job processing for downloads
+
+### Key Dependencies
+```json
+{
+  "next": "^15.0.0",
+  "react": "^19.0.0", 
+  "typescript": "^5.0.0",
+  "prisma": "^5.0.0",
+  "@prisma/client": "^5.0.0",
+  "mongodb": "^6.0.0",
+  "zod": "^3.22.0",
+  "react-hook-form": "@hookform/resolvers",
+  "@tanstack/react-query": "^5.0.0",
+  "zustand": "^4.0.0",
+  "axios": "^1.6.0",
+  "fs-extra": "^11.0.0",
+  "node-cron": "^3.0.0",
+  "bcryptjs": "^2.4.3",
+  "next-auth": "^4.24.0",
+  "xml2js": "^0.6.0",
+  "epub-metadata": "^1.0.0"
+}
+```
+
+## Folder Structure
+```
+
+app/                    # Next.js App Router
+│   ├── (dashboard)/       # Dashboard layout group
+│   │   ├── books/         # Book management
+│   │   ├── authors/       # Author pages  
+│   │   ├── downloads/     # Download queue
+│   │   └── settings/      # Configuration
+│   ├── api/               # API routes
+│   │   ├── books/         # Book CRUD operations
+│   │   ├── search/        # Book search endpoints
+│   │   ├── downloads/     # Download management
+│   │   └── config/        # Settings management
+│   └── globals.css        # Global styles
+├── components/            # Reusable components
+│   ├── ui/               # shadcn/ui components
+│   ├── forms/            # Form components
+│   ├── tables/           # Data tables
+│   └── dialogs/          # Modal dialogs
+├── lib/                  # Utilities and configurations
+│   ├── prisma.ts         # Database client
+│   ├── auth.ts           # Authentication helpers
+│   ├── apis/             # External API clients
+│   │   ├── google-books.ts
+│   │   ├── openlibrary.ts  
+│   │   ├── sabnzbd.ts
+│   │   ├── nzbget.ts
+│   │   └── indexers/     # NZB indexer clients
+│   │       ├── nzbgeek.ts
+│   │       ├── nzbhydra.ts
+│   │       └── newznab.ts
+│   ├── utils/            # Helper functions
+│   └── validations/      # Zod schemas
+├── hooks/                # Custom React hooks
+├── stores/               # Zustand stores  
+└── types/                # TypeScript type definitions
+```
+
+## Database Schema (Prisma)
+Focus on these main models:
+- **User**: Authentication and user preferences
+- **Book**: Core book metadata, file paths, status, reading progress
+- **Author**: Author information and relationships
+- **Series**: Book series tracking
+- **Download**: Download queue and history
+- **DownloadClient**: SABnzbd/NZBGet configurations
+- **Indexer**: NZB indexer settings (NZBGeek, NZBHydra2, etc.)
+- **QualityProfile**: Format preferences (EPUB preferred, PDF acceptable)
+- **Config**: Application settings
+- **ImportList**: Goodreads/wishlist imports
+
+## API Integration Guidelines
+
+### Google Books API
+- Primary source for book metadata
+- Handle rate limiting appropriately
+- Cache responses to avoid duplicate requests
+- Extract: title, authors, description, categories, cover images, ISBN
+
+### Multiple Download Clients
+- **SABnzbd**: RESTful API for queue management
+- **NZBGet**: XML-RPC API support
+- Monitor download status and progress across clients
+- Handle download completion webhooks
+- Support category-based organization
+
+### NZB Indexer Support
+- **NZBGeek**: Premium indexer with API access
+- **NZBHydra2**: Meta-indexer aggregation
+- **Generic Newznab**: Support any Newznab-compatible indexer
+- Rate limit handling per indexer
+- Search result aggregation and deduplication
+- Quality scoring and release selection
+
+### File Management
+- **Primary Format**: EPUB (best compatibility with Apple Books, Google Play Books, most readers)
+- **Secondary Format**: PDF (for books not available in EPUB)
+- **File Organization**: Configurable naming conventions
+- **Compatibility**: Optimized for iOS (Apple Books) and Android (Google Play Books, Moon+ Reader, etc.)
+- Automatic file organization by author/series
+- Duplicate detection and handling
+- Metadata embedding in EPUB files
+
+## UI/UX Requirements
+- **Dashboard**: Overview of recent additions, download activity, reading progress
+- **Search Interface**: Fast book search with filters and quality profiles
+- **Library View**: Grid/list views with sorting, filtering, and reading status
+- **Author/Series Pages**: Dedicated views for author catalogs and series tracking
+- **Settings Pages**: 
+  - Download client configuration (SABnzbd/NZBGet)
+  - Indexer management (NZBGeek, NZBHydra2, custom Newznab)
+  - Quality profiles and format preferences
+  - Authentication and user preferences
+- **Download Queue**: Real-time progress monitoring with client switching
+- **Import Tools**: Bulk import from existing libraries, Goodreads integration
+- **Responsive Design**: Mobile-friendly interface
+- **Dark/Light Mode**: Theme switching support
+
+## Code Quality Standards
+- Use TypeScript strictly, avoid `any` types
+- Implement proper error handling and user feedback
+- Add loading states for async operations
+- Use React Suspense and Error Boundaries
+- Write reusable, composable components
+- Follow Next.js best practices for performance
+- Implement proper SEO and accessibility
+
+## Security Considerations
+- Validate all user inputs with Zod
+- Sanitize file paths to prevent directory traversal
+- Implement rate limiting for external APIs
+- Use environment variables for sensitive configuration
+- Add CSRF protection for forms
+
+## Performance Optimization
+- Implement proper caching strategies
+- Use Next.js Image optimization for book covers
+- Lazy load heavy components and data
+- Optimize database queries with Prisma
+- Use React.memo for expensive components
+
+## Development Workflow
+1. **Authentication Setup**: Implement basic auth with NextAuth.js
+2. **Database Schema**: Create Prisma models for core functionality
+3. **API Integration**: Build Google Books API client and indexer connections
+4. **Core CRUD**: Book management, author/series tracking
+5. **Download System**: Multi-client support (SABnzbd/NZBGet) with queue management
+6. **Search & Quality**: Implement search with quality profile filtering
+7. **File Management**: EPUB/PDF handling with mobile reader optimization
+8. **Import System**: Library scanning and metadata matching
+9. **UI Polish**: Responsive design with shadcn/ui and Aceternity UI
+10. **Advanced Features**: Reading progress, series automation, notifications
+
+## Format Priority & Compatibility
+- **EPUB**: Primary format (Apple Books, Google Play Books, most readers)
+- **PDF**: Secondary format when EPUB unavailable
+- **Quality Profiles**: User-configurable format preferences
+- **Mobile Optimization**: Files optimized for iPhone/iPad and Android reading apps
+- **Metadata Embedding**: Rich metadata in EPUB files for proper organization
+
+Always prioritize user experience, maintainable code, and robust error handling. The goal is to create a modern, reliable alternative to Readarr that book enthusiasts will love to use.

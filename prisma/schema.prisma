@@ -1,0 +1,336 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String   @unique
+  email     String?  @unique
+  name      String?
+  password  String
+  role      String   @default("USER") // USER, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User preferences
+  preferences UserPreferences?
+
+  // Relations
+  books       Book[]
+  downloads   Download[]
+  importLists ImportList[]
+
+  @@map("users")
+}
+
+model UserPreferences {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+
+  // UI preferences
+  theme        String @default("system") // light, dark, system
+  language     String @default("en")
+  timezone     String @default("UTC")
+  
+  // Reading preferences
+  defaultFormat String @default("epub") // epub, pdf
+  readingGoal   Int? // books per year
+  
+  // Library preferences
+  autoDownload    Boolean @default(false)
+  qualityProfile  String? @db.ObjectId
+  defaultCategory String  @default("books")
+  
+  // API Keys
+  googleBooksApiKey String?
+  openLibraryApiKey String?
+  
+  // Notifications
+  emailNotifications Boolean @default(true)
+  downloadComplete   Boolean @default(true)
+  newBookAvailable   Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model Author {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  sortName    String? // For sorting (e.g., "Tolkien, J.R.R.")
+  biography   String?
+  birthDate   DateTime?
+  deathDate   DateTime?
+  nationality String?
+  website     String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // External IDs
+  googleBooksId String?
+  openLibraryId String?
+  goodreadsId   String?
+
+  // Relations
+  books  BookAuthor[]
+  series Series[]
+
+  @@map("authors")
+}
+
+model Series {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  authorId String @db.ObjectId
+  author   Author @relation(fields: [authorId], references: [id])
+  books    Book[]
+
+  @@map("series")
+}
+
+model Book {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  subtitle    String?
+  description String?
+  isbn        String?
+  isbn13      String?
+  asin        String?
+  language    String   @default("en")
+  pageCount   Int?
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // File information
+  filePath    String?
+  fileName    String?
+  fileSize    Int? // in bytes
+  format      String? // epub, pdf, mobi, etc.
+  quality     String? // high, medium, low
+  
+  // Status
+  status      BookStatus @default(UNREAD)
+  readingProgress Int    @default(0) // percentage 0-100
+  personalRating  Int? // 1-5 stars
+  dateAdded   DateTime @default(now())
+  dateRead    DateTime?
+  
+  // External IDs
+  googleBooksId String?
+  openLibraryId String?
+  goodreadsId   String?
+
+  // Relations
+  userId     String @db.ObjectId
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  authors    BookAuthor[]
+  seriesId   String? @db.ObjectId
+  series     Series? @relation(fields: [seriesId], references: [id])
+  seriesOrder Int? // Order within series
+  
+  downloads  Download[]
+  categories BookCategory[]
+
+  @@map("books")
+}
+
+model BookAuthor {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  bookId   String @db.ObjectId
+  authorId String @db.ObjectId
+  role     String @default("author") // author, editor, translator, etc.
+  order    Int    @default(0) // Order of authors
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, authorId])
+  @@map("book_authors")
+}
+
+model BookCategory {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  bookId   String @db.ObjectId
+  category String
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, category])
+  @@map("book_categories")
+}
+
+model Download {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  bookId      String         @db.ObjectId
+  userId      String         @db.ObjectId
+  status      DownloadStatus @default(PENDING)
+  progress    Float          @default(0) // 0-100
+  error       String?
+  retryCount  Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  completedAt DateTime?
+
+  // Download details
+  nzbUrl      String?
+  nzbData     String? // Base64 encoded NZB data
+  downloadUrl String?
+  fileName    String?
+  fileSize    Int?
+  
+  // Client information
+  clientType    String? // sabnzbd, nzbget
+  clientId      String? // ID from download client
+  category      String? // Download category
+  
+  // Quality information
+  quality       String?
+  format        String?
+  releaseGroup  String?
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("downloads")
+}
+
+model DownloadClient {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  type        String   // sabnzbd, nzbget
+  host        String
+  port        Int
+  username    String?
+  password    String?
+  apiKey      String?
+  category    String   @default("books")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Advanced settings
+  priority    Int      @default(0) // Higher number = higher priority
+  maxConnections Int   @default(4)
+  maxSpeed    String? // e.g., "10M" for 10 MB/s
+  paused      Boolean  @default(false)
+
+  @@map("download_clients")
+}
+
+model Indexer {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  type        String   // nzbgeek, nzbhydra, newznab, custom
+  url         String
+  apiKey      String?
+  username    String?
+  password    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Rate limiting
+  requestsPerMinute Int @default(60)
+  requestsPerDay    Int @default(1000)
+  lastRequestAt     DateTime?
+
+  // Search settings
+  searchEnabled Boolean @default(true)
+  tvSearchEnabled Boolean @default(false)
+  movieSearchEnabled Boolean @default(false)
+  bookSearchEnabled Boolean @default(true)
+
+  @@map("indexers")
+}
+
+model QualityProfile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Format preferences
+  preferredFormats String[] @default(["epub", "pdf"]) // Ordered by preference
+  minFileSize      Int? // Minimum file size in MB
+  maxFileSize      Int? // Maximum file size in MB
+  
+  // Quality settings
+  minQuality String @default("medium") // low, medium, high
+  maxQuality String @default("high")
+  
+  // Release group preferences
+  preferredGroups String[] @default([])
+  rejectedGroups  String[] @default([])
+
+  @@map("quality_profiles")
+}
+
+model Config {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  value     String
+  type      String   @default("string") // string, number, boolean, json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("config")
+}
+
+
+model ImportList {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  name        String
+  type        String   // goodreads, wishlist, csv, manual
+  source      String? // URL or file path
+  isActive    Boolean  @default(true)
+  lastSync    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Sync settings
+  autoSync    Boolean @default(false)
+  syncInterval Int? // hours
+  maxBooks    Int? // Maximum books to import
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("import_lists")
+}
+
+enum BookStatus {
+  UNREAD
+  READING
+  READ
+  WANT_TO_READ
+  DID_NOT_FINISH
+}
+
+enum DownloadStatus {
+  PENDING
+  DOWNLOADING
+  COMPLETED
+  FAILED
+  PAUSED
+  CANCELLED
+}

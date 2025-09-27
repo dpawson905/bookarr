@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  bookarr:
+    build: .
+    ports:
+      - "2665:2665"
+    environment:
+      # Database
+      - DATABASE_URL=mongodb://mongodb:27017/bookarr
+      
+      # NextAuth
+      - NEXTAUTH_URL=http://localhost:2665
+      - NEXTAUTH_SECRET=your-secret-key-change-in-production
+      
+      # Optional: API Keys (can also be set in app settings)
+      - GOOGLE_BOOKS_API_KEY=
+      - OPEN_LIBRARY_API_KEY=
+      
+      # Optional: Download Clients
+      - SABNZBD_URL=http://sabnzbd:8080
+      - SABNZBD_API_KEY=
+      - NZBGET_URL=http://nzbget:6789
+      - NZBGET_USERNAME=nzbget
+      - NZBGET_PASSWORD=
+      
+      # Optional: NZB Indexers
+      - NZBGEEK_API_KEY=
+      - NZBHYDRA_URL=http://nzbhydra:5076
+      - NZBHYDRA_API_KEY=
+      
+      # File Management
+      - BOOKS_LIBRARY_PATH=/app/data/books
+      - DOWNLOADS_PATH=/app/data/downloads
+      - TEMP_PATH=/tmp/bookarr
+      
+      # Application Settings
+      - APP_NAME=Bookarr
+      - DEFAULT_LANGUAGE=en
+      - DEFAULT_TIMEZONE=UTC
+      
+      # Features
+      - ENABLE_API_KEYS=true
+      - ENABLE_DOWNLOADS=true
+    volumes:
+      - bookarr_data:/app/data
+      - bookarr_temp:/tmp/bookarr
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2665/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=bookarr
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: SABnzbd for downloads
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - sabnzbd_config:/config
+      - bookarr_downloads:/downloads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    profiles:
+      - downloads
+
+  # Optional: NZBGet for downloads
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - nzbget_config:/config
+      - bookarr_downloads:/downloads
+    ports:
+      - "6789:6789"
+    restart: unless-stopped
+    profiles:
+      - downloads
+
+volumes:
+  bookarr_data:
+  bookarr_temp:
+  mongodb_data:
+  sabnzbd_config:
+  nzbget_config:
+  bookarr_downloads:
