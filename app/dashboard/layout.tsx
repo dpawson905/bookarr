@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { isAuthenticatedSession } from '@/types/session'
 import { cn } from '@/lib/utils'

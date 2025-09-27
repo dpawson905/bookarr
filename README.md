@@ -307,11 +307,16 @@ Regardless of deployment method, the first time you access Bookarr:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
-| `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random) |
+| `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random, persisted in `/app/data/nextauth-secret`) |
 
 ### Database
 - **SQLite database**: Automatically created at `./data/bookarr.db` (local) or `/app/data/bookarr.db` (Docker)
 - **No configuration needed**: Database path is hardcoded for simplicity
+
+### Security
+- **NEXTAUTH_SECRET**: Auto-generated on first run and persisted in `/app/data/nextauth-secret`
+- **File permissions**: Secret file is created with `600` permissions (owner read/write only)
+- **Persistence**: Secret survives container restarts and updates
 
 ### System (LinuxServer.io Standard)
 | Variable | Description | Default |

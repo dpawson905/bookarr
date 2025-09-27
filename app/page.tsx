@@ -1,28 +1,40 @@
-import { redirect } from 'next/navigation'
-import { PrismaClient } from '@prisma/client'
+'use client'
 
-const prisma = new PrismaClient()
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
-async function checkSetupStatus() {
-  try {
-    const userCount = await prisma.user.count()
-    return userCount === 0
-  } catch (error) {
-    console.error('Error checking setup status:', error)
-    return false
-  } finally {
-    await prisma.$disconnect()
-  }
-}
+export default function HomePage() {
+  const router = useRouter()
 
-export default async function HomePage() {
-  // Check if setup is required
-  const setupRequired = await checkSetupStatus()
-  
-  if (setupRequired) {
-    redirect('/setup')
-  }
-  
-  // If setup is not required, redirect to signin
-  redirect('/auth/signin')
+  useEffect(() => {
+    // Check setup status on the client side
+    const checkSetupStatus = async () => {
+      try {
+        const response = await fetch('/api/setup')
+        const data = await response.json()
+        
+        if (data.setupRequired) {
+          router.push('/setup')
+        } else {
+          router.push('/auth/signin')
+        }
+      } catch (error) {
+        console.error('Error checking setup status:', error)
+        // If there's any error, assume setup is required
+        router.push('/setup')
+      }
+    }
+
+    checkSetupStatus()
+  }, [router])
+
+  // Show loading state while checking
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  )
 }

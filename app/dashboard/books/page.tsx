@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,16 +14,15 @@ import {
 } from '@/components/ui/select'
 import { 
   Search, 
-  Filter, 
   Grid, 
   List, 
   Plus,
   BookOpen,
-  User,
   Calendar,
   Star
 } from 'lucide-react'
 import { BookWithDetails } from '@/types'
+import Image from 'next/image'
 
 export default function BooksPage() {
   const [books, setBooks] = useState<BookWithDetails[]>([])
@@ -295,10 +294,11 @@ export default function BooksPage() {
             <Card key={book.id} className="overflow-hidden">
               <div className="aspect-[3/4] bg-muted flex items-center justify-center">
                 {book.imageUrl ? (
-                  <img
+                  <Image
                     src={book.imageUrl}
                     alt={book.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <BookOpen className="h-12 w-12 text-muted-foreground" />
@@ -339,10 +339,12 @@ export default function BooksPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-20 bg-muted flex items-center justify-center flex-shrink-0">
                     {book.imageUrl ? (
-                      <img
+                      <Image
                         src={book.imageUrl}
                         alt={book.title}
-                        className="w-full h-full object-cover"
+                        width={64}
+                        height={80}
+                        className="object-cover"
                       />
                     ) : (
                       <BookOpen className="h-6 w-6 text-muted-foreground" />
