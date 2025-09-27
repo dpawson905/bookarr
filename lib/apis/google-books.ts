@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { GoogleBooksResponse, GoogleBookItem } from '@/types'
-import { apis } from '../config'
 
 const GOOGLE_BOOKS_API_BASE = 'https://www.googleapis.com/books/v1'
 
@@ -9,7 +8,7 @@ class GoogleBooksAPI {
   private baseURL: string
 
   constructor(apiKey?: string) {
-    this.apiKey = apiKey || apis.googleBooks
+    this.apiKey = apiKey || ''
     this.baseURL = GOOGLE_BOOKS_API_BASE
   }
 
