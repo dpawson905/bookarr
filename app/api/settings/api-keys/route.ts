@@ -4,7 +4,13 @@ import { authOptions } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { apiKeySettingsSchema } from '@/lib/validations/settings'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
+    }
+  }
+})
 
 // GET /api/settings/api-keys - Get API key settings
 export async function GET() {

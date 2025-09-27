@@ -1,9 +1,18 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from './prisma'
+import { PrismaClient } from '@prisma/client'
 import { nextAuth } from './config'
 import bcrypt from 'bcryptjs'
+
+// Create a new Prisma client instance for auth
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
+    }
+  }
+})
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,30 +27,35 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            username: credentials.username
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              username: credentials.username
+            }
+          })
+
+          if (!user) {
+            return null
           }
-        })
 
-        if (!user) {
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
+
+          if (!isPasswordValid) {
+            return null
+          }
+
+          return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            name: user.name,
+          }
+        } catch (error) {
+          console.error('Auth error:', error)
           return null
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
-
-        if (!isPasswordValid) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
         }
       }
     })

@@ -5,7 +5,13 @@ import { PrismaClient } from '@prisma/client'
 import { googleBooksAPI } from '@/lib/apis/google-books'
 import { Settings } from '@/lib/validations/settings'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || 'file:./data/bookarr.db'
+    }
+  }
+})
 
 export async function GET(request: NextRequest) {
   try {

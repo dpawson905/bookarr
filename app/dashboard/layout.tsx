@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useSettingsInitialization } from '@/hooks/useSettingsInitialization'
 import { 
   BookOpen, 
   Download, 
@@ -15,7 +16,8 @@ import {
   X,
   Home,
   Search,
-  LogOut
+  LogOut,
+  ChevronDown
 } from 'lucide-react'
 
 const navigation = [
@@ -32,30 +34,31 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
+  const userMenuRef = useRef<HTMLDivElement>(null)
+  
+  // Initialize settings when the app loads
+  useSettingsInitialization()
 
+  // Close user menu when clicking outside
   useEffect(() => {
-    if (status === 'loading') return // Still loading
-    if (!session) {
-      router.push('/auth/signin')
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
     }
-  }, [session, status, router])
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    )
-  }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
-  if (!session) {
-    return null // Will redirect to sign in
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/auth/signin' })
   }
 
   return (
@@ -153,8 +156,9 @@ export default function DashboardLayout({
             <Menu className="h-5 w-5" />
           </Button>
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="relative flex flex-1 items-center max-w-2xl">
+          {/* Centered search and user menu */}
+          <div className="flex flex-1 items-center justify-center gap-4">
+            <div className="relative flex items-center max-w-md w-full">
               <Search className="pointer-events-none absolute inset-y-0 left-0 h-full w-5 text-muted-foreground pl-3" />
               <input
                 type="text"
@@ -162,20 +166,36 @@ export default function DashboardLayout({
                 className="block h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               />
             </div>
-            
+
             {/* User menu */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground hidden sm:block">
-                {session.user?.name || session.user?.email}
-              </span>
+            <div className="relative" ref={userMenuRef}>
               <Button
                 variant="ghost"
-                size="icon"
-                onClick={() => signOut({ callbackUrl: '/' })}
-                title="Sign out"
+                className="flex items-center gap-2 px-3 py-2"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
-                <LogOut className="h-4 w-4" />
+                <User className="h-5 w-5" />
+                <span className="hidden sm:block">{session?.user?.username || 'User'}</span>
+                <ChevronDown className="h-4 w-4" />
               </Button>
+
+              {/* Dropdown menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg z-50">
+                  <div className="py-1">
+                    <div className="px-4 py-2 text-sm text-muted-foreground border-b">
+                      {session?.user?.name || session?.user?.username}
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
