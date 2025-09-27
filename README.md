@@ -129,6 +129,11 @@ services:
       # Database
       - DATABASE_URL=mongodb://mongodb:27017/bookarr
       
+      # User/Group IDs (LinuxServer.io standard)
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      
       # NextAuth (NEXTAUTH_SECRET auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
       
@@ -239,6 +244,13 @@ Regardless of deployment method, the first time you access Bookarr:
 | `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/bookarr?replicaSet=rs0&authSource=admin` |
 | `NEXTAUTH_URL` | Application URL | `http://localhost:2665` |
 | `NEXTAUTH_SECRET` | NextAuth secret key | **Auto-generated** (secure random) |
+
+### System (LinuxServer.io Standard)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PUID` | User ID for file permissions | `1000` |
+| `PGID` | Group ID for file permissions | `1000` |
+| `TZ` | Timezone | `UTC` |
 
 ### Optional (Can be set in app settings)
 | Variable | Description | Default |
