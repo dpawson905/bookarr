@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:/app/prisma/data/bookarr.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {

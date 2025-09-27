@@ -8,9 +8,8 @@ export const config = {
   port: process.env.PORT || '2665',
   nodeEnv: process.env.NODE_ENV || 'development',
   
-  // Database (hardcoded to ./data/bookarr.db)
-  // No configuration needed - SQLite database is always in the same location
-  databaseUrl: 'file:./data/bookarr.db',
+  // Database (configurable via DATABASE_URL environment variable)
+  databaseUrl: process.env.DATABASE_URL || 'file:./data/bookarr.db',
   
   // NextAuth Configuration
   nextAuth: {
@@ -22,8 +21,8 @@ export const config = {
   
   // File Management
   paths: {
-    booksLibrary: process.env.BOOKS_LIBRARY_PATH || '/app/data/books',
-    downloads: process.env.DOWNLOADS_PATH || '/app/data/downloads',
+    booksLibrary: process.env.BOOKS_LIBRARY_PATH || '/books',
+    downloads: process.env.DOWNLOADS_PATH || '/downloads',
     temp: process.env.TEMP_PATH || '/tmp/bookarr',
   },
   

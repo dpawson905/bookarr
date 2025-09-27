@@ -10,22 +10,13 @@ services:
       # User/Group IDs (LinuxServer.io standard)
       - PUID=1024
       - PGID=100
-      - TZ=UTC
+      - TZ=America/New_York
       
-          # Database (SQLite - hardcoded to /app/data/bookarr.db)
-          # No DATABASE_URL needed - path is hardcoded in schema
+      # Database configuration
+      - DATABASE_URL=file:/config/bookarr.db
       
       # NextAuth (NEXTAUTH_SECRET will be auto-generated if not provided)
       - NEXTAUTH_URL=http://localhost:2665
-      
-      # API Keys are configured in the app settings, not as environment variables
-      
-      # Download clients and indexers are configured in the app settings
-      
-      # File Management
-      - BOOKS_LIBRARY_PATH=/app/data/books
-      - DOWNLOADS_PATH=/app/data/downloads
-      - TEMP_PATH=/tmp/bookarr
       
       # Application Settings
       - DEFAULT_LANGUAGE=en
@@ -35,8 +26,9 @@ services:
       - ENABLE_API_KEYS=true
       - ENABLE_DOWNLOADS=true
     volumes:
-      - bookarr_data:/app/data
-      - bookarr_temp:/tmp/bookarr
+      - ./data:/config # Local config storage (database, settings)
+      - ./data/books:/books # Local books library for development
+      - ./data/downloads:/downloads # Local download directory for development
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:2665/api/health"]
@@ -44,7 +36,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-volumes:
-  bookarr_data:
-  bookarr_temp:

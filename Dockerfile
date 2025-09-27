@@ -22,8 +22,8 @@ RUN mkdir -p data
 # Generate Prisma client
 RUN npx prisma generate
 
-# Initialize database during build
-RUN npx prisma db push
+# Create config directory and initialize database during build
+RUN mkdir -p /config && DATABASE_URL="file:/config/bookarr.db" npx prisma db push
 
 # Build the application
 RUN npm run build
@@ -35,8 +35,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=2665
 
-# Install openssl for secret generation
-RUN apk add --no-cache openssl
+# Install openssl for secret generation, su-exec for user switching, and sqlite3 for database operations
+RUN apk add --no-cache openssl su-exec sqlite
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
@@ -48,19 +48,23 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-# Copy initialized database
-COPY --from=builder /app/prisma/data/bookarr.db ./prisma/data/bookarr.db
+# Copy initialized database to config directory
+COPY --from=builder /config/bookarr.db /config/bookarr.db
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Create data directories
-RUN mkdir -p /app/data/books /app/data/downloads /app/prisma/data /tmp/bookarr
-RUN chown -R nextjs:nodejs /app/data /app/prisma /tmp/bookarr
-RUN chmod -R 755 /app/data /app/prisma
+RUN mkdir -p /config /books /downloads /tmp/bookarr
+RUN chown -R nextjs:nodejs /config /books /downloads /tmp/bookarr
+RUN chmod -R 755 /config /books /downloads
 
-USER nextjs
+# Ensure config directory is writable by nextjs user
+RUN chown -R nextjs:nodejs /config
+RUN chmod -R 755 /config
+
+# Don't switch to nextjs user yet - entrypoint needs to run as root to fix permissions
 
 EXPOSE 2665
 

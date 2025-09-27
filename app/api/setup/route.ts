@@ -7,20 +7,35 @@ import path from 'path'
 
 const prisma = new PrismaClient()
 
-// Initialize database if it doesn't exist
+// Check if database is accessible and create if needed
 async function ensureDatabaseExists() {
   try {
-    const dataDir = path.join(process.cwd(), 'data')
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
-    
     // Try to connect to the database
     await prisma.$connect()
     return true
   } catch (error) {
     console.error('Database connection failed:', error)
-    return false
+    
+    // If database doesn't exist or is empty, try to create it
+    try {
+      console.log('📊 Creating database...')
+      
+      // Delete empty database file if it exists
+      const dbPath = '/config/bookarr.db'
+      if (fs.existsSync(dbPath) && fs.statSync(dbPath).size === 0) {
+        console.log('🗑️  Removing empty database file')
+        fs.unlinkSync(dbPath)
+      }
+      
+      await prisma.$executeRaw`PRAGMA foreign_keys=ON`
+      await prisma.$connect()
+      
+      console.log('✅ Database created successfully')
+      return true
+    } catch (createError) {
+      console.error('❌ Failed to create database:', createError)
+      return false
+    }
   }
 }
 
