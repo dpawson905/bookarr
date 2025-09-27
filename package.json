@@ -2,6 +2,10 @@
   "name": "bookarr",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.20.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack -p 2665",
     "build": "next build --turbopack",

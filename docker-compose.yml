@@ -8,8 +8,8 @@ services:
       - "2665:2665"
     environment:
       # User/Group IDs (LinuxServer.io standard)
-      - PUID=1000
-      - PGID=1000
+      - PUID=1024
+      - PGID=100
       - TZ=UTC
       
       # Database (SQLite - no separate database needed!)

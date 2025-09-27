@@ -13,7 +13,7 @@ npm run dev
 ```
 Open [http://localhost:2665](http://localhost:2665)
 
-### Docker Compose
+### Docker Compose (Local Build)
 ```bash
 git clone <repository-url>
 cd bookarr
@@ -21,12 +21,46 @@ docker-compose up -d
 ```
 Open [http://localhost:2665](http://localhost:2665)
 
+### Docker Compose (Docker Hub)
+```bash
+# Create a directory for your Bookarr setup
+mkdir bookarr-setup && cd bookarr-setup
+
+# Create docker-compose.yml
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+services:
+  bookarr:
+    image: dpawson905/bookarr:latest
+    container_name: bookarr
+    ports:
+      - "2665:2665"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - DATABASE_URL=file:/app/data/bookarr.db
+      - NEXTAUTH_URL=http://localhost:2665
+    volumes:
+      - bookarr_data:/app/data
+    restart: unless-stopped
+volumes:
+  bookarr_data:
+EOF
+
+# Start the application
+docker-compose up -d
+```
+Open [http://localhost:2665](http://localhost:2665)
+
 ### Portainer (GUI)
-1. Build the image: `docker build -t bookarr:latest .`
-2. Save the image: `docker save bookarr:latest | gzip > bookarr.tar.gz`
-3. Import `bookarr.tar.gz` in Portainer
-4. Create stack using `portainer-stack.yml`
-5. Deploy and access at [http://localhost:2665](http://localhost:2665)
+1. **Option A - Docker Hub**: Use `dpawson905/bookarr:latest` directly
+2. **Option B - Local Build**: 
+   - Build: `docker build -t bookarr:latest .`
+   - Save: `docker save bookarr:latest | gzip > bookarr.tar.gz`
+   - Import `bookarr.tar.gz` in Portainer
+3. Create stack using `portainer-stack.yml` (update image to `dpawson905/bookarr:latest`)
+4. Deploy and access at [http://localhost:2665](http://localhost:2665)
 
 ### Integration with Existing Setups
 Bookarr is designed to integrate seamlessly with your existing download clients and indexers:
@@ -53,6 +87,21 @@ No need to change your current setup - just add Bookarr alongside it!
 
 **Note:** Bookarr runs on port 2665 (spells "BOOK" on a keypad) to avoid conflicts with other common development ports.
 
+## 🐳 Docker Hub Images
+
+Available tags on Docker Hub (`dpawson905/bookarr`):
+
+- `latest` - Latest stable release
+- `develop` - Development branch (may be unstable)
+- `v1.0.0` - Specific version tags
+- `v1.0` - Major.minor version
+- `v1` - Major version only
+
+**Pull the latest stable:**
+```bash
+docker pull dpawson905/bookarr:latest
+```
+
 ## 📋 Prerequisites
 
 ### Required
@@ -62,7 +111,7 @@ No need to change your current setup - just add Bookarr alongside it!
 - SABnzbd or NZBGet (for downloads)
 - NZB indexers (NZBGeek, NZBHydra2, etc.)
 - Portainer (for GUI-based deployment)
-- Node.js 18+ (for local development)
+- Node.js 22.20.0+ (for local development)
 
 ## 🛠️ Deployment Methods
 
