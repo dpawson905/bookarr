@@ -17,8 +17,7 @@ export async function GET() {
     }
 
     const preferences = await prisma.userPreferences.findUnique({
-      where: { userId:
-      session.user.id }
+      where: { userId: session.user.id }
     })
 
     const apiKeys = {
@@ -52,8 +51,7 @@ export async function PUT(request: NextRequest) {
 
     // Upsert user preferences with API keys
     const updatedPreferences = await prisma.userPreferences.upsert({
-      where: { userId:
-      session.user.id },
+      where: { userId: session.user.id },
       update: { 
         googleBooksApiKey: validatedApiKeys.googleBooksApiKey,
         openLibraryApiKey: validatedApiKeys.openLibraryApiKey,

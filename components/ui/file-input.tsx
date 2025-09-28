@@ -19,12 +19,20 @@ const FileInput = forwardRef<HTMLInputElement, FileInputProps>(
     }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0]
-      if (file && onPathSelect) {
-        // For web applications, we can only get the file path in some browsers
-        // In a real implementation, you might want to use a different approach
-        // or handle this server-side
-        onPathSelect(file.name)
+      const files = event.target.files
+      if (files && files.length > 0) {
+        const file = files[0]
+        if (onPathSelect) {
+          // For directory selection, extract the directory path
+          if (file.webkitRelativePath) {
+            // This is a directory selection - get the directory name
+            const path = file.webkitRelativePath.split('/')[0]
+            onPathSelect(path)
+          } else {
+            // This is a file selection - just use the filename
+            onPathSelect(file.name)
+          }
+        }
       }
     }
 

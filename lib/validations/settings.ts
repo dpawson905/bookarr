@@ -21,9 +21,14 @@ export const indexerSettingsSchema = z.object({
   name: z.string().min(1, 'Indexer name is required'),
   type: z.enum(['nzbgeek', 'nzbhydra', 'newznab', 'custom']),
   url: z.string().url('Invalid URL format'),
-  apiKey: z.string().min(1, 'API key is required'),
-  enabled: z.boolean().default(true),
-  priority: z.number().int().min(1).max(10).default(5),
+  apiKey: z.string().optional(),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  isActive: z.boolean().default(true),
+  requestsPerMinute: z.number().int().min(1).max(1000).default(60),
+  requestsPerDay: z.number().int().min(1).max(10000).default(1000),
+  searchEnabled: z.boolean().default(true),
+  bookSearchEnabled: z.boolean().default(true),
 })
 
 export const librarySettingsSchema = z.object({

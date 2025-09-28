@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useSettingsInitialization } from '@/hooks/useSettingsInitialization'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { FileInput } from '@/components/ui/file-input'
 import ApiKeysSettings from '@/components/settings/ApiKeysSettings'
+import IndexerSettings from '@/components/settings/IndexerSettings'
 import { 
   Settings, 
   Download, 
@@ -20,8 +21,12 @@ import {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general')
-  const [libraryPath, setLibraryPath] = useState('')
-  const [downloadPath, setDownloadPath] = useState('')
+  // These paths are set via Docker volumes and cannot be changed in the UI
+  const libraryPath = '/books'
+  const downloadPath = '/downloads'
+  
+  // Initialize settings (loads API keys)
+  useSettingsInitialization()
 
   const tabs = [
     { id: 'general', label: 'General', icon: Settings },
@@ -179,30 +184,44 @@ export default function SettingsPage() {
                 <CardHeader>
                   <CardTitle>Library Settings</CardTitle>
                   <CardDescription>
-                    Configure your book library paths and organization
+                    Library paths are configured via Docker volumes and cannot be changed here
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="library-path">Library Path</Label>
-                    <FileInput
-                      id="library-path"
-                      placeholder="/path/to/books"
-                      value={libraryPath}
-                      onChange={(e) => setLibraryPath(e.target.value)}
-                      onPathSelect={setLibraryPath}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="library-path"
+                        value={libraryPath}
+                        readOnly
+                        className="bg-muted"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                        Docker Volume
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Mapped to: <code className="bg-muted px-1 rounded">./data/books:/books</code>
+                    </p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="download-path">Download Path</Label>
-                    <FileInput
-                      id="download-path"
-                      placeholder="/path/to/downloads"
-                      value={downloadPath}
-                      onChange={(e) => setDownloadPath(e.target.value)}
-                      onPathSelect={setDownloadPath}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="download-path"
+                        value={downloadPath}
+                        readOnly
+                        className="bg-muted"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                        Docker Volume
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Mapped to: <code className="bg-muted px-1 rounded">./data/downloads:/downloads</code>
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -230,61 +249,16 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="pt-4">
-                    <Button>Save Library Settings</Button>
+                    <div className="text-sm text-muted-foreground">
+                      💡 To change these paths, update your <code className="bg-muted px-1 rounded">docker-compose.yml</code> file and restart the container
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
           )}
 
-          {activeTab === 'indexers' && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>NZB Indexers</CardTitle>
-                  <CardDescription>
-                    Configure your NZB indexers for book searches
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="indexer-name">Indexer Name</Label>
-                    <Input id="indexer-name" placeholder="NZBGeek" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="indexer-type">Type</Label>
-                    <select className="w-full p-2 border rounded-md">
-                      <option value="nzbgeek">NZBGeek</option>
-                      <option value="nzbhydra">NZBHydra2</option>
-                      <option value="newznab">Newznab</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="indexer-url">URL</Label>
-                    <Input id="indexer-url" placeholder="https://api.nzbgeek.info" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="indexer-api-key">API Key</Label>
-                    <Input id="indexer-api-key" type="password" placeholder="Your API key" />
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Switch id="indexer-enabled" defaultChecked />
-                    <Label htmlFor="indexer-enabled">Enable this indexer</Label>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button>Test Connection</Button>
-                    <Button variant="outline">Add Indexer</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+          {activeTab === 'indexers' && <IndexerSettings />}
 
           {activeTab === 'notifications' && (
             <div className="space-y-6">
